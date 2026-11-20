@@ -150,6 +150,9 @@ public final class IslandHud {
         if (b == null || !b.contains(mouseX, mouseY)) {
             return false;
         }
+        if (dragging) {
+            return true;
+        }
         dragging = true;
         dragDx = mouseX - (b.x1() + b.x2()) / 2.0;
         dragDy = mouseY - b.y1();
@@ -165,6 +168,57 @@ public final class IslandHud {
         c.customX = (float) Math.max(0, Math.min(1, (mouseX - dragDx) / guiWidth));
         c.customY = (float) Math.max(0, Math.min(1, (mouseY - dragDy) / guiHeight));
         return true;
+    }
+
+    /**
+     * Polled every frame while chat is open: start on a fresh left press over the island, follow the cursor while
+     * the button is held, save on release. Does not depend on the screen's drag events.
+     */
+    private static boolean wasDown;
+    /** show the "hold Ctrl" hint for a moment each time chat opens */
+    private static long hintUntil;
+    private static boolean chatWasOpen;
+
+    /**
+     * Moving: hold Ctrl and the island follows the mouse (no button needed), release Ctrl to drop it there.
+     * Holding the left button on the island works too where the game reports it.
+     */
+    private static void pollDrag(Minecraft mc, double mouseX, double mouseY, int guiWidth, int guiHeight) {
+        boolean ctrl = ctrlDown();
+        boolean mouse = mc.mouseHandler.isLeftPressed();
+        // grab only when the cursor is on the island, so Ctrl+V / Ctrl+A in chat do not move it
+        if (!dragging && ctrl && !wasCtrl && anchor != null
+                && mouseX >= anchor.x1() - 6 && mouseX < anchor.x2() + 6
+                && mouseY >= anchor.y1() - 6 && mouseY < anchor.y2() + 6) {
+            startDrag(Math.max(anchor.x1(), Math.min(anchor.x2() - 1, mouseX)),
+                    Math.max(anchor.y1(), Math.min(anchor.y2() - 1, mouseY)));
+            ctrlDrag = true;
+        }
+        wasCtrl = ctrl;
+        if (!dragging && mouse && !wasDown && anchor != null && anchor.contains(mouseX, mouseY)) {
+            startDrag(mouseX, mouseY);
+            ctrlDrag = false;
+        }
+        if (dragging) {
+            if (ctrlDrag ? ctrl : mouse) {
+                drag(mouseX, mouseY, guiWidth, guiHeight);
+            } else {
+                stopDrag();
+            }
+        }
+        wasDown = mouse;
+    }
+
+    private static boolean ctrlDrag;
+    private static boolean wasCtrl;
+
+    private static boolean ctrlDown() {
+        return com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_LCONTROL)
+                || com.mojang.blaze3d.platform.InputConstants.isKeyDown(com.mojang.blaze3d.platform.InputConstants.KEY_RCONTROL);
+    }
+
+    public static boolean isDragging() {
+        return dragging;
     }
 
     public static boolean stopDrag() {
@@ -204,6 +258,18 @@ public final class IslandHud {
         lastFrame = now;
 
         entries.removeIf(e -> expired(e, now, c) || (!c.enabled && !e.forced));
+        if (chat) {
+            if (!chatWasOpen) {
+                hintUntil = now + 2500;
+            }
+            pollDrag(mc, mouseX, mouseY, g.guiWidth(), g.guiHeight());
+        } else {
+            wasDown = false;
+            if (dragging) {
+                stopDrag();
+            }
+        }
+        chatWasOpen = chat;
         anchor = null;
         if (entries.isEmpty() && !chat) {
             return;
@@ -266,7 +332,7 @@ public final class IslandHud {
         }
         g.pose().popMatrix();
 
-        if (chat && anchor != null && (dragging || anchor.contains(mouseX, mouseY))) {
+        if (chat && anchor != null && (dragging || anchor.contains(mouseX, mouseY) || hintUntil > now)) {
             Bounds b = anchor;
             g.outline(b.x1() - 1, b.y1() - 1, b.x2() - b.x1() + 2, b.y2() - b.y1() + 2, BindConfig.accent());
             Component hint = Component.translatable("bindisland.chat.drag");

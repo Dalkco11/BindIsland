@@ -89,7 +89,7 @@
   "bindisland.key.show_all": "Show all",
   "bindisland.key.hide_all": "Hide all",
   "bindisland.more": "+%s more",
-  "bindisland.chat.drag": "Drag to move",
+  "bindisland.chat.drag": "Hover + hold Ctrl to move the island",
   "bindisland.position.custom": "custom (drag in chat)",
   "bindisland.preview.action2": "Easy Place",
   "bindisland.binds.empty": "Nothing found",

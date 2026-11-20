@@ -89,7 +89,7 @@
   "bindisland.key.show_all": "Показать все",
   "bindisland.key.hide_all": "Скрыть все",
   "bindisland.more": "ещё %s",
-  "bindisland.chat.drag": "Перетащи, чтобы переместить",
+  "bindisland.chat.drag": "Наведи и зажми Ctrl, чтобы переместить островок",
   "bindisland.position.custom": "своё (перетащи в чате)",
   "bindisland.preview.action2": "Easy Place",
   "bindisland.binds.empty": "Ничего не найдено",
