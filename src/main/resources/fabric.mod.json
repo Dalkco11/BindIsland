@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "bindisland",
+  "version": "${version}",
+  "name": "Bind Island",
+  "description": "A small island at the top of the screen shows the key you pressed and what it does: vanilla, modded and malilib (Litematica, Tweakeroo, MiniHUD) hotkeys.",
+  "authors": [
+    "Dalkco"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/bind-island",
+    "sources": "https://github.com/Dalkco11/BindIsland",
+    "issues": "https://github.com/Dalkco11/BindIsland/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/bindisland/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.dalkco.bindisland.BindIslandClient"
+    ],
+    "modmenu": [
+      "com.dalkco.bindisland.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "bindisland.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=26.3",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
